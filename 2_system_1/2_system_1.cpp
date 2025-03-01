@@ -60,7 +60,7 @@ void WriteStep(uint8_t channel, float value, bool trig) {
     note += ChannelNoteOffset(channel);
     note = Quantizer::apply(static_cast<Quantizer::Scale>(scale), note);
     float freq = daisysp::mtof(note);
-    hw.som.WriteCvOut(1 - channel, ftov(freq)); //cv channels switched??
+    hw.som.WriteCvOut(channel+1, ftov(freq));
     vcos[channel].SetFreq(freq);
     gates[channel] = trig;
 };

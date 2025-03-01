@@ -65,7 +65,7 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
         vcfs[i].SetFreq(daisysp::fmap(knob_cv_combo(4 + i*2, 0 + i*2), 0.1f, 15000.0f));
         vcfs[i].SetRes(knob_cv_combo(5 + i*2, 1 + i*2));
         out_val[i] = adsrs[i].Process(gates[i]->State());
-        hw.som.WriteCvOut(i, out_val[1-i] * 5.0f);
+        hw.som.WriteCvOut(i+1, out_val[1-i] * 5.0f);
 
         uint8_t led = adsrs[i].GetCurrentSegment();
         if (led == 4) { led--; } // who knows
