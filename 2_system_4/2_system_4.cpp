@@ -125,12 +125,12 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
                 gates[1] = false;
             }
         }
-        
+
         hw.som.gate_out_1.Write(gates[0]);
         hw.som.gate_out_2.Write(gates[1]);
         
-        OUT_L[i] = tone_drum.Process(gates[0]);
-        OUT_R[i] = noise_drum.Process(gates[1]);
+        OUT_L[i] = tone_drum.Process(gates[0]) + IN_L[i];
+        OUT_R[i] = noise_drum.Process(gates[1]) + IN_R[i];
 
         hw.leds[0].Set(tone_drum.GetCurrAmp());
         hw.leds[1].Set(noise_drum.GetCurrAmp());
