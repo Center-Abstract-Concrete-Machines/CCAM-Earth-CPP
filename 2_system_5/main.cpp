@@ -1,21 +1,34 @@
 #include <ccam/hw/estuary.h>
 #include <ccam/voice/warmosc.h>
+#include <ccam/utils/lockedEstuaryKnobs.h>
 #include "daisysp.h"
 
 ccam::hw::Estuary hw;
-std::array<WarmOsc, 12> vcos; 
-std::array<float, 12> detune_constants = {
-    0.0f, 0.16f, 0.25f, 0.38f, 
-    0.55f, 0.80f, 1.20f, 0.14f,
-    0.20f, 0.30f, 0.45f, 0.65f,
+std::array<WarmOsc, 18> vcos;
+std::array<float, 9> detune_constants = {
+    0.0f,
+    0.16f, 0.25f, 0.38f, 0.55f,
+    0.80f, 1.20f, 0.14f, 0.20f
 };
+
+std::array<float, 9> octave_constants = {
+    1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f,
+    2.0f, 2.0f, 3.0f, 3.0f
+};
+
+LockedEstaury main_ctrl;
+LockedEstaury left_vco_ctrl;
+LockedEstaury right_vco_ctrl;
 
 static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     daisy::AudioHandle::OutputBuffer out, 
     size_t size
 ) {
     hw.ProcessAllControls();
-
+    main_ctrl.Process();
+    left_vco_ctrl.Process();
+    right_vco_ctrl.Process();
 
     uint8_t wave_type;
     switch(hw.switches[0].Read()) {
@@ -30,27 +43,55 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
             break;
     }
 
-    for (WarmOsc& vco : vcos) {
-        vco.SetDetuneAmt(hw.knobs[0]->Value());
-        vco.SetAmp(hw.knobs[1]->Value());
-        vco.SetRootFreq(daisysp::fmap(hw.knobs[2]->Value(), 10.0f, 1000.0f));
-        vco.SetWaveform(wave_type);
+    float freq = daisysp::fmap(main_ctrl.Value(0), 10.0f, 1000.0f);
+    float amp = main_ctrl.Value(1);
+    float detune = main_ctrl.Value(2);
+
+    for (size_t v_i = 0; v_i < vcos.size(); v_i++) {
+
+        size_t o_i = v_i % octave_constants.size();
+        auto& ctrl = v_i < detune_constants.size() ?
+            left_vco_ctrl : right_vco_ctrl;
+
+        if (o_i == 0) {
+            vcos[v_i].SetDetuneAmt(0.0f);
+            vcos[v_i].SetAmp(amp);
+        } else {
+            vcos[v_i].SetDetuneAmt(detune);
+            vcos[v_i].SetAmp(ctrl.Value(o_i-1) * amp);
+        }
+
+        vcos[v_i].SetRootFreq(freq * octave_constants[o_i]);
+        vcos[v_i].SetWaveform(wave_type);
     }
 
-    size_t num_voices = static_cast<size_t>(
-        hw.knobs[3]->Value() * vcos.size()
-    );
+    
+    LockedEstaury* led_ctrl;
+    switch(hw.switches[1].Read()) {
+        case daisy::Switch3::POS_LEFT:
+            led_ctrl = &main_ctrl;
+            break;
+        case daisy::Switch3::POS_CENTER:
+            led_ctrl = &left_vco_ctrl;
+            break;
+        case daisy::Switch3::POS_RIGHT:
+            led_ctrl = &right_vco_ctrl;
+            break;
+    }
+
+    for (size_t i = 0; i < hw.leds.size(); i++)
+    {
+        hw.leds[i].Set(led_ctrl->Value(i) - 0.1);
+    }
 
     for (size_t i = 0; i < size; i++)
     {
-        float sum = 0.0f;
-        for (size_t voice = 0; voice < vcos.size(); voice++) {
-            float value = vcos[voice].Process();
-            if (voice < num_voices) {
-                sum += value;
-            }
+        OUT_L[i] = 0.0f;
+        OUT_R[i] = 0.0f;
+        for (size_t v_i = 0; v_i < octave_constants.size(); v_i++) {
+            OUT_L[i] += vcos[v_i].Process();
+            OUT_R[i] += vcos[v_i + octave_constants.size()].Process();
         }
-        OUT_L[i] = sum;
     }
 
     hw.PostProcess();
@@ -60,17 +101,26 @@ int main(void)
 {
     hw.Init();
 
+    // give it a few cycles to initialize the knob values
+    // otherwise everything is silent or 100%
+    for (size_t i = 0; i < 10; i++) {
+        daisy::System::Delay(1);
+        hw.ProcessAllControls();
+    }
+
+    main_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_LEFT));
+    left_vco_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_CENTER));
+    right_vco_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_RIGHT));
+
     for (size_t i = 0; i < vcos.size(); i++) {
+        size_t d_i = i % detune_constants.size();
         vcos[i].Init(hw.som.AudioSampleRate());
-        vcos[i].SetDetuneFreq(detune_constants[i]);
+        vcos[i].SetDetuneFreq(detune_constants[d_i]);
     }
 
     hw.StartAudio(AudioCallback);
 
-    bool ledOn = false;
     while(1) {
-        ledOn = !ledOn;
-        hw.leds[0].Set(ledOn ? 0.0f : 1.0f);
         daisy::System::Delay(1000);
     }
 }
