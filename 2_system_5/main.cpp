@@ -1,5 +1,6 @@
 #include <ccam/hw/estuary.h>
 #include <ccam/voice/warmosc.h>
+#include <ccam/voice/smoothosc.h>
 #include <ccam/utils/lockedEstuaryKnobs.h>
 #include "daisysp.h"
 
@@ -16,6 +17,9 @@ std::array<float, 9> octave_constants = {
     1.0f, 1.0f, 1.0f, 1.0f,
     2.0f, 2.0f, 3.0f, 3.0f
 };
+
+SmoothOsc lfo;
+daisysp::SmoothRandomGenerator noise;
 
 LockedEstaury main_ctrl;
 LockedEstaury left_vco_ctrl;
@@ -43,22 +47,51 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
             break;
     }
 
-    float freq = daisysp::fmap(main_ctrl.Value(0), 10.0f, 1000.0f);
-    float amp = main_ctrl.Value(1);
-    float detune = main_ctrl.Value(2);
+    float left_vco_freq = daisysp::fmap(
+        main_ctrl.Value(0), 10.0f, 1000.0f
+    );
+    float right_vco_freq = daisysp::fmap(
+        main_ctrl.Value(1), 10.0f, 1000.0f
+    );
+    float amp = main_ctrl.Value(2);
+    float detune = main_ctrl.Value(3);
+
+    float lfo_freq = daisysp::fmap(
+        main_ctrl.Value(4), 0.1f, 30.0f
+    );
+    
+    lfo.SetFreq(lfo_freq);
+    lfo.SetWaveshape(main_ctrl.Value(5));
+    noise.SetFreq(
+        daisysp::fmap(main_ctrl.Value(6), 0.1f, 30.0f)
+    );
+    float cv_amp = main_ctrl.Value(7) * 5.0f;
+
+    hw.som.WriteCvOut(1, (lfo.Process() + 1.0f) * cv_amp);
+    hw.som.WriteCvOut(2, fabs(noise.Process()) * cv_amp);
+
+    float chaos = main_ctrl.Value(7);
 
     for (size_t v_i = 0; v_i < vcos.size(); v_i++) {
 
         size_t o_i = v_i % octave_constants.size();
-        auto& ctrl = v_i < detune_constants.size() ?
-            left_vco_ctrl : right_vco_ctrl;
+
+        LockedEstaury* ctrl;
+        float freq;
+        if (v_i < detune_constants.size()) {
+            ctrl = &left_vco_ctrl;
+            freq = left_vco_freq;
+        } else {
+            ctrl = &right_vco_ctrl;
+            freq = right_vco_freq;
+        }
 
         if (o_i == 0) {
             vcos[v_i].SetDetuneAmt(0.0f);
             vcos[v_i].SetAmp(amp);
         } else {
             vcos[v_i].SetDetuneAmt(detune);
-            vcos[v_i].SetAmp(ctrl.Value(o_i-1) * amp);
+            vcos[v_i].SetAmp(ctrl->Value(o_i-1) * amp);
         }
 
         vcos[v_i].SetRootFreq(freq * octave_constants[o_i]);
@@ -117,6 +150,9 @@ int main(void)
         vcos[i].Init(hw.som.AudioSampleRate());
         vcos[i].SetDetuneFreq(detune_constants[d_i]);
     }
+
+    lfo.Init(hw.som.AudioCallbackRate());
+    noise.Init(hw.som.AudioCallbackRate());
 
     hw.StartAudio(AudioCallback);
 
