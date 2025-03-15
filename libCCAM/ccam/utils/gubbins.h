@@ -32,5 +32,5 @@ inline float randf() {
 inline float ftov(float freq)
 {
     // assume 0V = A1
-    return daisysp::fastlog2f(freq/55.0f);
+    return log2f(freq/55.0f);
 }
