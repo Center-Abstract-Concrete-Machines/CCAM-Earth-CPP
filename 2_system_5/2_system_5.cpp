@@ -25,6 +25,13 @@ LockedEstaury main_ctrl;
 LockedEstaury left_vco_ctrl;
 LockedEstaury right_vco_ctrl;
 
+float combine_cv_safe(float value, uint8_t cv_idx) {
+    float cv_in = hw.cvins[cv_idx]->Value();
+    // noise
+    if (fabs(cv_in) < 0.1f) cv_in = 0.0f;
+    return daisysp::fclamp(value + cv_in, 0.0, 1.0f);
+}
+
 static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     daisy::AudioHandle::OutputBuffer out, 
     size_t size
@@ -48,13 +55,17 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     }
 
     float left_vco_freq = daisysp::fmap(
-        main_ctrl.Value(0), 10.0f, 1000.0f
+        combine_cv_safe(main_ctrl.Value(0), 0),
+        10.0f,
+        1000.0f
     );
     float right_vco_freq = daisysp::fmap(
-        main_ctrl.Value(1), 10.0f, 1000.0f
+        combine_cv_safe(main_ctrl.Value(1), 1),
+        10.0f,
+        1000.0f
     );
-    float amp = main_ctrl.Value(2);
-    float detune = main_ctrl.Value(3);
+    float amp = combine_cv_safe(main_ctrl.Value(2), 2);
+    float detune = combine_cv_safe(main_ctrl.Value(3), 3);
 
     float lfo_freq = daisysp::fmap(
         main_ctrl.Value(4), 0.1f, 30.0f
@@ -69,8 +80,6 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
 
     hw.som.WriteCvOut(1, (lfo.Process() + 1.0f) * cv_amp);
     hw.som.WriteCvOut(2, fabs(noise.Process()) * cv_amp);
-
-    float chaos = main_ctrl.Value(7);
 
     for (size_t v_i = 0; v_i < vcos.size(); v_i++) {
 
