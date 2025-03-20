@@ -13,8 +13,7 @@ ccam::hw::Estuary hw;
 Shaper shape;
 daisysp::Decimator decimate;
 daisysp::ReverbSc verb;
-std::array<daisysp::Oscillator, 3> lfos;
-bool clocking = false;
+std::array<daisysp::Oscillator, 2> lfos;
 
 float interpf(float v1, float v2, float amt) {
     return v1*(1.0f-amt) + v2*amt;
@@ -22,6 +21,10 @@ float interpf(float v1, float v2, float amt) {
 
 float process_shape(float in) {
     return decimate.Process(shape.Process(in));
+}
+
+float remap_osc(float in) {
+    return (in + 1.0f) / 2.0f;
 }
 
 static void AudioCallback(daisy::AudioHandle::InputBuffer in,
@@ -40,17 +43,16 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     float wet = hw.knobs[6]->Value();
 
     for (auto& lfo : lfos) {
-        lfo.SetFreq(daisysp::fmap(hw.knobs[7]->Value(), 0.1f, 256.0f));
-        lfo.Process();
+        lfo.SetFreq(daisysp::fmap(hw.knobs[7]->Value(), 0.1f, 50.0f));
     }
 
-
-    if (lfos[2].IsEOC()) {
-        clocking = !clocking;
-        hw.som.gate_out_1.Write(clocking);
-        hw.som.gate_out_2.Write(clocking);
-        hw.leds[0].Set(clocking ? 0.0f : 1.0f);
-    }
+    float sin_lfo_val = lfos[0].Process();
+    hw.som.WriteCvOut(daisy::patch_sm::CV_OUT_1, remap_osc(sin_lfo_val) * 5.0f);
+    hw.som.WriteCvOut(daisy::patch_sm::CV_OUT_2, remap_osc(lfos[1].Process()) * 5.0f);
+    bool clocking = (sin_lfo_val > 0.0f);
+    hw.som.gate_out_1.Write(clocking);
+    hw.som.gate_out_2.Write(clocking);
+    hw.leds[0].Set(clocking ? 0.0f : 1.0f);
 
     for (size_t i = 0; i < size; i++)
     {
@@ -110,7 +112,6 @@ int main(void)
     }
     lfos[0].SetWaveform(daisysp::Oscillator::WAVE_SIN);
     lfos[1].SetWaveform(daisysp::Oscillator::WAVE_SAW);
-    lfos[2].SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
 
     hw.StartAudio(AudioCallback);
 
