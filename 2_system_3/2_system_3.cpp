@@ -13,7 +13,7 @@ ccam::hw::Estuary hw;
 Shaper shape;
 daisysp::Decimator decimate;
 daisysp::ReverbSc verb;
-daisysp::Metro metro;
+std::array<daisysp::Oscillator, 3> lfos;
 bool clocking = false;
 
 float interpf(float v1, float v2, float amt) {
@@ -39,17 +39,21 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
 
     float wet = hw.knobs[6]->Value();
 
-    metro.SetFreq(daisysp::fmap(hw.knobs[7]->Value(), 0.1f, 256.0f));
+    for (auto& lfo : lfos) {
+        lfo.SetFreq(daisysp::fmap(hw.knobs[7]->Value(), 0.1f, 256.0f));
+        lfo.Process();
+    }
+
+
+    if (lfos[2].IsEOC()) {
+        clocking = !clocking;
+        hw.som.gate_out_1.Write(clocking);
+        hw.som.gate_out_2.Write(clocking);
+        hw.leds[0].Set(clocking ? 0.0f : 1.0f);
+    }
 
     for (size_t i = 0; i < size; i++)
     {
-        if (metro.Process()) {
-            clocking = !clocking;
-            hw.som.gate_out_1.Write(clocking);
-            hw.som.gate_out_2.Write(clocking);
-            hw.leds[0].Set(clocking ? 0.0f : 1.0f);
-        }
-
         float left_in, left_out;
         float right_in, right_out;
         
@@ -100,7 +104,14 @@ int main(void)
     decimate.Init();
     decimate.SetSmoothCrushing(true);
     verb.Init(hw.som.AudioSampleRate());
-    metro.Init(1.0f, hw.som.AudioSampleRate());
+
+    for (auto& lfo : lfos) {
+        lfo.Init(hw.som.AudioCallbackRate());
+    }
+    lfos[0].SetWaveform(daisysp::Oscillator::WAVE_SIN);
+    lfos[1].SetWaveform(daisysp::Oscillator::WAVE_SAW);
+    lfos[2].SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+
     hw.StartAudio(AudioCallback);
 
     while(1) {
