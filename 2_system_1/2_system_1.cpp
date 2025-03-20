@@ -28,6 +28,19 @@ LockedEstaury knobs_8x1;
 LockedEstaury knobs_2x4;
 LockedEstaury knobs_ctrl;
 
+// coefficents from python calibration
+constexpr std::array<float, 3> coeffs = {
+    -0.0009612f, 1.031f, -0.0009436f
+};
+
+float adjust_voltage(float target) {
+    float result = 0.0f;
+    result += coeffs[0] * target * target;
+    result += coeffs[1] * target;
+    result += coeffs[2];
+    return result;
+}
+
 void Step8x1() {
     step_num = (step_num + 1) % 8;
 }
@@ -60,7 +73,7 @@ void WriteStep(uint8_t channel, float value, bool trig) {
     note += ChannelNoteOffset(channel);
     note = Quantizer::apply(static_cast<Quantizer::Scale>(scale), note);
     float freq = daisysp::mtof(note);
-    hw.som.WriteCvOut(channel+1, ftov(freq));
+    hw.som.WriteCvOut(channel+1, adjust_voltage(ftov(freq)));
     vcos[channel].SetFreq(freq);
     gates[channel] = trig;
 };

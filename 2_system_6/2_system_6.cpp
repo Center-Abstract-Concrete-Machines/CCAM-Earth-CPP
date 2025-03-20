@@ -19,7 +19,7 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     // STRING PARAMS
     float string_freq = 0.0f;
     string_freq += daisysp::fmap(main_ctrl.Value(0), 1.0f, 1000.f);
-    string_freq += hw.cvins[0]->Value()*5.0f;
+    string_freq *= (1.0f + hw.cvins[0]->Value()*5.0f);
     string_freq = daisysp::fclamp(string_freq, 1.0f, 1000.f);
 
     float string_amp = 0.0f;
@@ -33,7 +33,7 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     // MODAL PARAMS
     float modal_freq = 0.0f;
     modal_freq += daisysp::fmap(main_ctrl.Value(4), 1.0f, 1000.f);
-    modal_freq += hw.cvins[2]->Value()*5.0f;
+    modal_freq *= (1.0f + hw.cvins[2]->Value()*5.0f);
     modal_freq = daisysp::fclamp(modal_freq, 1.0f, 1000.f);
 
     float modal_amp = 0.0f;
@@ -60,6 +60,22 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     modal_voice.SetFreq(modal_freq);
     if (hw.som.gate_in_2.Trig() && daisy::Random::GetFloat(0.0f, 1.0f) < modal_chance) {
         modal_voice.Trig();
+    }
+
+    LockedEstaury* led_ctrl;
+    switch(hw.switches[1].Read()) {
+        case daisy::Switch3::POS_LEFT:
+            led_ctrl = &main_ctrl;
+            break;
+        case daisy::Switch3::POS_CENTER:
+        case daisy::Switch3::POS_RIGHT:
+            led_ctrl = &tone_ctrl;
+            break;
+    }
+
+    for (size_t i = 0; i < hw.leds.size(); i++)
+    {
+        hw.leds[i].Set(led_ctrl->Value(i) - 0.1);
     }
 
     for (size_t i = 0; i < size; i++)
@@ -91,8 +107,8 @@ int main(void)
         hw.ProcessAllControls();
     }
 
-    tone_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_LEFT));
-    main_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_RIGHT) | (1 << daisy::Switch3::POS_CENTER));
+    main_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_LEFT));
+    tone_ctrl.Init(hw, 1, (1 << daisy::Switch3::POS_RIGHT) | (1 << daisy::Switch3::POS_CENTER));
 
     modal_voice.Init(hw.som.AudioSampleRate());
     string_voice.Init(hw.som.AudioSampleRate());
