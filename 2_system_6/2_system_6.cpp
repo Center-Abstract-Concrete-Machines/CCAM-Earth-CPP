@@ -9,6 +9,17 @@ daisysp::ModalVoice modal_voice;
 LockedEstaury tone_ctrl;
 LockedEstaury main_ctrl;
 
+bool string_active = false;
+bool modal_active = false;
+
+template <typename Voice>
+void set_freq(Voice& voice, uint8_t knob_idx, uint8_t cv_idx) {
+    float freq = 0.0f;
+    freq += daisysp::fmap(main_ctrl.Value(knob_idx), 1.0f, 1000.f);
+    freq *= powf(2.0f, hw.cvins[cv_idx]->Value()*5.0f);
+    voice.SetFreq(freq);
+}
+
 static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     daisy::AudioHandle::OutputBuffer out, 
     size_t size) {
@@ -17,11 +28,6 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     main_ctrl.Process();
 
     // STRING PARAMS
-    float string_freq = 0.0f;
-    string_freq += daisysp::fmap(main_ctrl.Value(0), 1.0f, 1000.f);
-    string_freq *= (1.0f + hw.cvins[0]->Value()*5.0f);
-    string_freq = daisysp::fclamp(string_freq, 1.0f, 1000.f);
-
     float string_amp = 0.0f;
     string_amp += main_ctrl.Value(1) * 3.0f;
     string_amp += hw.cvins[1]->Value();
@@ -31,11 +37,6 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     float string_chance = main_ctrl.Value(3);
 
     // MODAL PARAMS
-    float modal_freq = 0.0f;
-    modal_freq += daisysp::fmap(main_ctrl.Value(4), 1.0f, 1000.f);
-    modal_freq *= (1.0f + hw.cvins[2]->Value()*5.0f);
-    modal_freq = daisysp::fclamp(modal_freq, 1.0f, 1000.f);
-
     float modal_amp = 0.0f;
     modal_amp += main_ctrl.Value(5) * 3.0f;
     modal_amp += hw.cvins[3]->Value();
@@ -48,18 +49,30 @@ static void AudioCallback(daisy::AudioHandle::InputBuffer in,
     string_voice.SetStructure(tone_ctrl.Value(1));
     string_voice.SetBrightness(tone_ctrl.Value(2));
     string_voice.SetDamping(tone_ctrl.Value(3));
-    string_voice.SetFreq(string_freq);
-    if (hw.som.gate_in_1.Trig() && daisy::Random::GetFloat(0.0f, 1.0f) < string_chance) {
-        string_voice.Trig();
+
+    if (hw.som.gate_in_1.Trig()) {
+        string_active = daisy::Random::GetFloat(0.0f, 1.0f) < string_chance;
+        if (string_active) {
+            string_voice.Trig();
+        }
+    }
+    if (string_active && hw.som.gate_in_1.State()) {
+        set_freq(string_voice, 0, 0);
     }
 
     modal_voice.SetAccent(tone_ctrl.Value(4));
     modal_voice.SetStructure(tone_ctrl.Value(5));
     modal_voice.SetBrightness(tone_ctrl.Value(6));
     modal_voice.SetDamping(tone_ctrl.Value(7));
-    modal_voice.SetFreq(modal_freq);
-    if (hw.som.gate_in_2.Trig() && daisy::Random::GetFloat(0.0f, 1.0f) < modal_chance) {
-        modal_voice.Trig();
+
+    if (hw.som.gate_in_2.Trig()) {
+        modal_active = daisy::Random::GetFloat(0.0f, 1.0f) < modal_chance;
+        if (modal_active) {
+            modal_voice.Trig();
+        }
+    }
+    if (modal_active && hw.som.gate_in_2.State()) {
+        set_freq(modal_voice, 4, 2);
     }
 
     LockedEstaury* led_ctrl;
@@ -114,11 +127,12 @@ int main(void)
     string_voice.Init(hw.som.AudioSampleRate());
     hw.StartAudio(AudioCallback);
 
+    hw.som.StartLog(false);
     bool ledOn = false;
     while(1) {
         ledOn = !ledOn;
         hw.leds[0].Set(ledOn ? 0.0f : 1.0f);
         hw.PostProcess();
-        daisy::System::Delay(1000);
+        daisy::System::Delay(100);
     }
 }
