@@ -27,7 +27,7 @@ This repository is meant to serve primarily as a jumping off point for C++ proje
 ```
 git clone git@github.com:Center-Abstract-Concrete-Machines/CCAM-Earth-CPP.git --recurse-submodules
 
-cd CCAM-Earth-init
+cd CCAM-Earth-CPP
 
 yum install dfu-util arm-none-eabi-gcc-cs arm-none-eabi-newlib
 
