@@ -1,6 +1,33 @@
 #ifndef __CCAM_ESTUARY_H__
 #define __CCAM_ESTUARY_H__
 
+/**
+ * CCAM Estuary Hardware Abstraction
+ * 
+ * CCAM Estuary is based on the Daisy Patch SM platform and provides access to:
+ * 
+ * Hardware Features:
+ * - 8 Knobs (analog inputs, first 4 are bipolar CV capable)
+ * - 4 CV Inputs (additional analog inputs for external control)
+ * - 2 Gate Inputs (digital trigger/gate detection)
+ * - 8 LEDs (programmable indicators)
+ * - 2 Three-way Switches (up/center/down positions)
+ * - 2 Audio Inputs + 2 Audio Outputs (24-bit, up to 96kHz)
+ * - 2 CV Outputs (12-bit DAC for control voltage generation)
+ * 
+ * Target Use Case:
+ * - Performance-oriented modules requiring extensive manual control
+ * - Live performance and real-time manipulation
+ * - Complex synthesis and effects processing
+ * - Eurorack integration with abundant CV I/O
+ * 
+ * Comparison to CCAM Earth:
+ * - More knobs (8 vs 6)
+ * - More CV inputs (4 vs 2)
+ * - Fewer buttons (2 switches vs 8 buttons)
+ * - Same audio I/O and CV output capabilities
+ */
+
 #include <array>
 
 #include "daisy_patch_sm.h"
@@ -9,6 +36,16 @@ namespace ccam {
 
 namespace hw {
 
+/**
+ * CCAM Estuary Hardware Abstraction Layer
+ * 
+ * Provides unified access to all Daisy Patch SM-based I/O:
+ * - Audio processing (Init, StartAudio)
+ * - Control voltage generation (StartCV) 
+ * - Real-time control reading (ProcessAllControls)
+ * - Gate input detection (gate_in_1, gate_in_2)
+ * - LED and switch management (PostProcess)
+ */
 struct Estuary {
 
     void Init() 
@@ -54,6 +91,10 @@ struct Estuary {
             daisy::patch_sm::DaisyPatchSM::A9,
             daisy::patch_sm::DaisyPatchSM::A8
         );
+
+        // Initialize gate inputs
+        gate_inputs[0] = &som.gate_in_1;
+        gate_inputs[1] = &som.gate_in_2;
     }
 
     void PostProcess()
@@ -66,6 +107,8 @@ struct Estuary {
     void ProcessAllControls() 
     {
         som.ProcessAllControls();
+        // Note: GateIn objects are processed automatically by the som.ProcessAllControls()
+        // No additional processing needed for gate inputs
     }
 
     void SetAudioSampleRate(size_t sample_rate) 
@@ -97,11 +140,12 @@ struct Estuary {
         return som.dac.GetConfig().target_samplerate / 48;
     }
 
-    daisy::patch_sm::DaisyPatchSM som;
-    std::array<daisy::AnalogControl*, 8> knobs;
-    std::array<daisy::AnalogControl*, 4> cvins;
-    std::array<daisy::Led, 8> leds;
-    std::array<daisy::Switch3, 2> switches;
+    daisy::patch_sm::DaisyPatchSM som;                 // Core Daisy Patch SM hardware interface
+    std::array<daisy::AnalogControl*, 8> knobs;         // 8 knobs (0-3: bipolar CV, 4-7: unipolar)
+    std::array<daisy::AnalogControl*, 4> cvins;         // 4 CV inputs for external control
+    std::array<daisy::GateIn*, 2> gate_inputs;          // 2 gate inputs for trigger/gate detection
+    std::array<daisy::Led, 8> leds;                     // 8 programmable LEDs
+    std::array<daisy::Switch3, 2> switches;             // 2 three-way switches (up/center/down)
 };
 
 } // namespace hw
