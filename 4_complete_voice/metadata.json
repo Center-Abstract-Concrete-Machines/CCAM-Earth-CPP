@@ -1,0 +1,39 @@
+{
+  "name": "Complete Voice",
+  "description": "Single-voice subtractive synthesizer — VCO into SVF filter into ADSR-gated VCA",
+  "knobs": {
+    "1": "Envelope attack (1ms–3s)",
+    "2": "Envelope decay (1ms–3s)",
+    "3": "Envelope sustain level (0–1)",
+    "4": "Envelope release (1ms–5s)",
+    "5": "Pitch offset (±2 octaves around CV 1 V/oct input)",
+    "6": "Filter frequency offset (±8V around CV 2, sweeps 20Hz–18kHz)",
+    "7": "Filter resonance base (modulated by CV 3)",
+    "8": "Filter drive base (modulated by CV 4)"
+  },
+  "switches": {
+    "1": "Filter mode (left=LP, center=BP, right=HP)",
+    "2": "Waveform (left=sine, center=triangle, right=saw)"
+  },
+  "cv_in": {
+    "1": "Pitch V/oct (0V = A1 / 55 Hz, 1V per octave, 0–8V range)",
+    "2": "Filter frequency V/oct (exponential, 0–8V maps to 20Hz–18kHz)",
+    "3": "Filter resonance modulation (bipolar ±5V around knob 7)",
+    "4": "Filter drive modulation (bipolar ±5V around knob 8)"
+  },
+  "gate_in": {
+    "1": "Voice gate (high=note on / sustain, low=release)",
+    "2": "unused"
+  },
+  "gate_out": {
+    "1": "unused",
+    "2": "unused"
+  },
+  "cv_out": {
+    "1": "unused",
+    "2": "unused"
+  },
+  "leds": "ADSR stage indicator — LED 1=attack, 2=decay, 3=sustain, 4=release",
+  "audio_in": "unused",
+  "audio_out": "Mono voice (VCO → SVF → VCA) summed to both L and R channels"
+}

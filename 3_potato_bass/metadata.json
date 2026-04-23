@@ -1,31 +1,39 @@
 {
-  "name": "Potato Bass",
-  "description": "Turing machine bass synthesizer with additive harmonics and portamento",
+  "name": "FRM: Cybernugget Bass",
+  "description": "Turing machine bass synthesizer with additive harmonics, sub-bass, and portamento",
   "knobs": {
     "1": "Amplitude attack",
     "2": "Amplitude decay",
     "3": "Harmonic richness",
     "4": "Filter cutoff",
-    "5": "Turing loop probability (0 = always change, 1 = frozen)",
-    "6": "Glide / portamento time"
+    "5": "Turing loop probability (CCW=always change, CW=frozen loop)",
+    "6": "Glide / portamento time",
+    "7": "Octave shift (CCW=-2oct, noon=0, CW=+2oct)",
+    "8": "Sub-bass mix"
+  },
+  "switches": {
+    "1": "Step length (up/center=16-step, down=8-step)",
+    "2": "Filter type (up=LP, center=BP, down=HP)"
   },
   "cv_in": {
-    "1": "Filter frequency modulation (±1V)",
-    "2": "unused"
+    "1": "Filter frequency modulation (bipolar, exponential scaling)",
+    "2": "unused",
+    "3": "unused",
+    "4": "unused"
   },
   "gate_in": {
     "1": "Clock",
     "2": "Bass accent"
   },
   "gate_out": {
-    "1": "Fires on accent step",
-    "2": "Fires on non-accent step"
+    "1": "Fires on accent step (gate in 2 high)",
+    "2": "Fires on non-accent step (gate in 2 low)"
   },
   "cv_out": {
-    "1": "Alt note pitch (1V/oct)",
-    "2": "Main note pitch with octave shift (1V/oct)"
+    "1": "Alt note pitch from Turing hi-byte (1V/oct, 0V = MIDI 60)",
+    "2": "Main note pitch with octave shift (1V/oct, 0V = MIDI 60)"
   },
-  "leds": "Turing register lower byte as bitmap (1 LED per bit)",
-  "audio_in": "Mixed with synthesis output",
-  "audio_out": "Stereo synthesis + audio in mix"
+  "leds": "Turing register lower 8 bits as bitmap (1 LED per bit)",
+  "audio_in": "Summed with synthesis output (stereo passthrough)",
+  "audio_out": "Stereo filtered bass synthesis + audio in"
 }

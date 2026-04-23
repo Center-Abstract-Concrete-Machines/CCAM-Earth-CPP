@@ -13,8 +13,7 @@ jobs:
 
     env:
       # Add firmware ids here when they graduate from dev to main
-      STABLE_FIRMWARES: "alien_rhythm potato_bass wizard_drumkit"
-      HARDWARE: "estuary"
+      STABLE_FIRMWARES: "alien_rhythm potato_bass wizard_drumkit complete_voice"
 
     steps:
       - name: Checkout with submodules
@@ -43,7 +42,11 @@ jobs:
 
             make ccam_main CCAM_PROJECT="$PROJECT_DIR"
 
-            ASSET="ccam-${HARDWARE}-${fw}-${VERSION}.bin"
+            # Detect hardware from source include
+            SRC=$(find "$PROJECT_DIR" -name "*.cpp" | head -1)
+            if grep -q "estuary.h" "$SRC"; then HW="estuary"; else HW="earth"; fi
+
+            ASSET="ccam-${HW}-${fw}-${VERSION}.bin"
             cp "build/${fw}.bin" "release-artifacts/${ASSET}"
             echo "Packaged: ${ASSET}"
           done
@@ -55,9 +58,14 @@ jobs:
           from datetime import date
 
           stable   = os.environ["STABLE_FIRMWARES"].split()
-          hardware = os.environ["HARDWARE"]
           version  = os.environ["VERSION"]
           repo     = "Center-Abstract-Concrete-Machines/CCAM-Earth-CPP"
+
+          def detect_hardware(fw):
+              src_files = glob.glob(f"*_{fw}/*.cpp")
+              if src_files and "estuary.h" in open(src_files[0]).read():
+                  return "estuary"
+              return "earth"
 
           firmwares = []
           for fw in stable:
@@ -68,6 +76,7 @@ jobs:
               with open(matches[0]) as f:
                   meta = json.load(f)
 
+              hardware = detect_hardware(fw)
               filename = f"ccam-{hardware}-{fw}-{version}.bin"
               entry = {
                   "id":          fw,

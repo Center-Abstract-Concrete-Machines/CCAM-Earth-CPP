@@ -1,31 +1,39 @@
 {
-  "name": "Wizard Drumkit",
-  "description": "Euclidean drum sequencer with 3 voices (kick, snare, hihat) and chaos/swing",
+  "name": "FRM: Wizard Percussion",
+  "description": "Euclidean + Perlin noise drum sequencer with 3 switchable voices and logistic chaos/swing",
   "knobs": {
     "1": "BPM (20–300, overridden by external clock)",
     "2": "Kick Euclidean fill density",
     "3": "HiHat Perlin noise density threshold",
     "4": "Snare Perlin noise density threshold",
     "5": "Chaos / swing amount",
-    "6": "Kick pattern length (1–32 steps)"
+    "6": "Kick pattern length (1–32 steps)",
+    "7": "HiHat Perlin Y offset (shifts pattern in noise space)",
+    "8": "Snare Perlin Y offset (shifts pattern in noise space)"
+  },
+  "switches": {
+    "1": "Kick model (up=808, center=909, down=basic tone drum)",
+    "2": "Snare model (up=808, center=909, down=basic noise drum)"
   },
   "cv_in": {
-    "1": "HiHat stereo pan (±1V = left/right)",
-    "2": "Snare frequency modulation (+100 Hz per 1V)"
+    "1": "HiHat stereo pan (±1V = full left/right)",
+    "2": "Snare frequency (+100 Hz per 1V)",
+    "3": "Kick pitch V/oct (wraps within 1 octave, base = C2 / 65 Hz)",
+    "4": "unused"
   },
   "gate_in": {
-    "1": "External clock (overrides internal BPM)",
-    "2": "Open hihat trigger (long decay)"
+    "1": "External clock (overrides internal BPM when present)",
+    "2": "Open hihat trigger (forces long decay on next hit)"
   },
   "gate_out": {
     "1": "Clock pulse (every step)",
     "2": "Kick trigger pulse"
   },
   "cv_out": {
-    "1": "HiHat noise value (0–5V)",
+    "1": "HiHat Perlin noise value (0–5V)",
     "2": "Logistic chaos value (0–5V)"
   },
-  "leds": "16-step sequencer position (2 steps per LED, bright = active)",
-  "audio_in": "Mixed with drum synthesis output",
+  "leds": "16-step sequencer position across 8 LEDs (2 steps per LED)",
+  "audio_in": "Summed with drum synthesis output (stereo passthrough)",
   "audio_out": "Stereo kick + snare + panned hihat mix"
 }
