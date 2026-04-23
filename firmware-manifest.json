@@ -1,0 +1,27 @@
+{
+  "version": "0.0.0",
+  "released": "unpublished",
+  "firmwares": [
+    {
+      "id": "alien_rhythm",
+      "name": "Alien Rhythm",
+      "hardware": "earth",
+      "file": "ccam-earth-alien_rhythm-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-alien_rhythm-v0.0.0.bin"
+    },
+    {
+      "id": "potato_bass",
+      "name": "Potato Bass",
+      "hardware": "earth",
+      "file": "ccam-earth-potato_bass-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-potato_bass-v0.0.0.bin"
+    },
+    {
+      "id": "wizard_drumkit",
+      "name": "Wizard Drumkit",
+      "hardware": "earth",
+      "file": "ccam-earth-wizard_drumkit-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-wizard_drumkit-v0.0.0.bin"
+    }
+  ]
+}

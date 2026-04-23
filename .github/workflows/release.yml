@@ -1,0 +1,94 @@
+name: Release Firmware
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      # Add firmware ids here when they graduate from dev to main
+      STABLE_FIRMWARES: "alien_rhythm potato_bass wizard_drumkit"
+      HARDWARE: "earth"
+
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install ARM GCC toolchain
+        run: sudo apt-get install -y gcc-arm-none-eabi
+
+      - name: Build stable firmwares
+        run: |
+          mkdir -p release-artifacts
+          VERSION="${{ github.ref_name }}"
+
+          for fw in $STABLE_FIRMWARES; do
+            echo "=== Building $fw ==="
+
+            # Find the project folder (e.g. 3_alien_rhythm)
+            PROJECT_DIR=$(find . -maxdepth 1 -type d -name "*_${fw}" | head -1 | sed 's|^\./||')
+            if [ -z "$PROJECT_DIR" ]; then
+              echo "ERROR: No project directory found for firmware: $fw"
+              exit 1
+            fi
+            echo "Project dir: $PROJECT_DIR"
+
+            make ccam_main CCAM_PROJECT="$PROJECT_DIR"
+
+            ASSET="ccam-${HARDWARE}-${fw}-${VERSION}.bin"
+            cp "build/${fw}.bin" "release-artifacts/${ASSET}"
+            echo "Packaged: ${ASSET}"
+          done
+
+      - name: Generate firmware manifest
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          from datetime import date
+
+          stable   = os.environ["STABLE_FIRMWARES"].split()
+          hardware = os.environ["HARDWARE"]
+          version  = os.environ["VERSION"]
+          repo     = "Center-Abstract-Concrete-Machines/CCAM-Earth-CPP"
+
+          def to_title(s):
+              return " ".join(w.capitalize() for w in s.split("_"))
+
+          firmwares = []
+          for fw in stable:
+              filename = f"ccam-{hardware}-{fw}-{version}.bin"
+              firmwares.append({
+                  "id":       fw,
+                  "name":     to_title(fw),
+                  "hardware": hardware,
+                  "file":     filename,
+                  "url":      f"https://github.com/{repo}/releases/download/{version}/{filename}"
+              })
+
+          manifest = {
+              "version":   version.lstrip("v"),
+              "released":  str(date.today()),
+              "firmwares": firmwares
+          }
+
+          with open("release-artifacts/firmware-manifest.json", "w") as f:
+              json.dump(manifest, f, indent=2)
+
+          print(json.dumps(manifest, indent=2))
+          EOF
+        env:
+          VERSION: ${{ github.ref_name }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*
+          generate_release_notes: true
