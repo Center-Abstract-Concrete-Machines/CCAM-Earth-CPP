@@ -72,7 +72,53 @@ export CCAM_PROJECT=0_kitchen_sink
 make program-dfu
 ```
 
+<<<<<<< Updated upstream
 The device will automatically start running your code after flashing completes.
+=======
+## Releases & Branch Workflow
+
+Firmware releases are published to [GitHub Releases](https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases). Each release includes a `firmware-manifest.json` that web-based flasher tools use to discover and download firmware.
+
+### Branches
+- `main` — stable, release-ready code only. Do not push directly.
+- `dev` — active development. Merge feature branches here first.
+- `feature/<name>` — per-firmware or per-feature work (e.g. `feature/cuttlefish`).
+
+```
+feature/X → dev (PR) → main (PR) → tag → GitHub Release
+```
+
+### Cutting a Release
+1. Merge `dev` into `main` via pull request.
+2. Tag the commit with a semver version:
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+3. GitHub Actions builds all stable firmwares automatically and publishes the release.
+
+### Adding a Firmware to a Release
+When a firmware is ready to ship, add its id to `STABLE_FIRMWARES` in `.github/workflows/release.yml`:
+```yaml
+STABLE_FIRMWARES: "alien_rhythm potato_bass wizard_drumkit my_new_firmware"
+```
+Commit that change to `main`, then tag and push as above.
+
+### Semver conventions
+- `patch` (`v1.0.1`): bug fix, no new features
+- `minor` (`v1.1.0`): new firmware added, or new feature in existing firmware
+- `major` (`v2.0.0`): hardware-breaking change
+
+---
+
+## Debug
+After you plug in the board, check `sudo dmesg | tail` to determine the serail port number. Then you can use screen to monitor the device.
+```
+sudo screen /dev/ttyACM0 115200
+```
+Note that the program will not start running until you connect, so if you do not plan on using the serial monitor it
+it probably a good idea to remove that line entirely.
+>>>>>>> Stashed changes
 
 ## Troubleshooting
 

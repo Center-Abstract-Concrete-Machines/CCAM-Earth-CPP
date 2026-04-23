@@ -1,0 +1,31 @@
+{
+  "name": "Potato Bass",
+  "description": "Turing machine bass synthesizer with additive harmonics and portamento",
+  "knobs": {
+    "1": "Amplitude attack",
+    "2": "Amplitude decay",
+    "3": "Harmonic richness",
+    "4": "Filter cutoff",
+    "5": "Turing loop probability (0 = always change, 1 = frozen)",
+    "6": "Glide / portamento time"
+  },
+  "cv_in": {
+    "1": "Filter frequency modulation (±1V)",
+    "2": "unused"
+  },
+  "gate_in": {
+    "1": "Clock",
+    "2": "Bass accent"
+  },
+  "gate_out": {
+    "1": "Fires on accent step",
+    "2": "Fires on non-accent step"
+  },
+  "cv_out": {
+    "1": "Alt note pitch (1V/oct)",
+    "2": "Main note pitch with octave shift (1V/oct)"
+  },
+  "leds": "Turing register lower byte as bitmap (1 LED per bit)",
+  "audio_in": "Mixed with synthesis output",
+  "audio_out": "Stereo synthesis + audio in mix"
+}
