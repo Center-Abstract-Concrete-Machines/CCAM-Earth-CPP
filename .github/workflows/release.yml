@@ -14,7 +14,7 @@ jobs:
     env:
       # Add firmware ids here when they graduate from dev to main
       STABLE_FIRMWARES: "alien_rhythm potato_bass wizard_drumkit"
-      HARDWARE: "earth"
+      HARDWARE: "estuary"
 
     steps:
       - name: Checkout with submodules
