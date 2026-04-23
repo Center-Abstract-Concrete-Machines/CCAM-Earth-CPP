@@ -5,60 +5,88 @@
     {
       "id": "alien_rhythm",
       "name": "Alien Rhythm",
-      "description": "3-voice Klee rhythm sequencer with resonant filter",
-      "hardware": "earth",
-      "file": "ccam-earth-alien_rhythm-v0.0.0.bin",
-      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-alien_rhythm-v0.0.0.bin",
+      "description": "3-voice Klee shift-register sequencer with resonant filter",
+      "hardware": "estuary",
+      "file": "ccam-estuary-alien_rhythm-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-estuary-alien_rhythm-v0.0.0.bin",
       "io": {
         "knobs": {
           "1": "Amplitude attack",
           "2": "Amplitude decay",
           "3": "Filter resonance",
           "4": "Filter cutoff",
-          "5": "Sync / hocket mode",
-          "6": "Note change probability"
+          "5": "Sync / hocket mode (CCW=sync with gate 2, noon=always fire, CW=hocket)",
+          "6": "Note change probability",
+          "7": "Jump range (scale degree leap size)",
+          "8": "Filter envelope attack"
         },
-        "cv_in": { "1": "Filter frequency modulation (±1V)", "2": "unused" },
-        "gate_in": { "1": "Clock", "2": "Accent / sync input" },
-        "gate_out": { "1": "Fires when chord triggers", "2": "Fires when chord rests" },
-        "cv_out": { "1": "Top voice pitch (1V/oct)", "2": "Bottom voice pitch (1V/oct)" },
-        "leds": "16-step sequencer position (2 steps per LED, bright = active)",
-        "audio_in": "Mixed with synthesis output",
-        "audio_out": "Stereo synthesis + audio in mix"
+        "switches": {
+          "1": "Waveform (up=sine, center=triangle, down=saw)",
+          "2": "Filter mode (up=LP, center=BP, down=HP)"
+        },
+        "cv_in": {
+          "1": "Filter frequency modulation (bipolar ±1V)",
+          "2": "unused",
+          "3": "unused",
+          "4": "unused"
+        },
+        "gate_in": { "1": "Clock", "2": "Bass state / sync signal" },
+        "gate_out": { "1": "Fires when step triggers (chord voice)", "2": "Clock passthrough (mirrors gate in 1)" },
+        "cv_out": {
+          "1": "Top voice pitch (1V/oct, 0V = MIDI 60 / middle C)",
+          "2": "Bottom voice pitch (1V/oct, 0V = MIDI 60 / middle C)"
+        },
+        "leds": "16-step sequencer position across 8 LEDs (2 steps per LED; bright=active, dim=inactive)",
+        "audio_in": "Summed with synthesis output (stereo passthrough)",
+        "audio_out": "Stereo filtered synthesis + audio in"
       }
     },
     {
       "id": "potato_bass",
       "name": "Potato Bass",
-      "description": "Turing machine bass synthesizer with additive harmonics and portamento",
-      "hardware": "earth",
-      "file": "ccam-earth-potato_bass-v0.0.0.bin",
-      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-potato_bass-v0.0.0.bin",
+      "description": "Turing machine bass synthesizer with additive harmonics, sub-bass, and portamento",
+      "hardware": "estuary",
+      "file": "ccam-estuary-potato_bass-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-estuary-potato_bass-v0.0.0.bin",
       "io": {
         "knobs": {
           "1": "Amplitude attack",
           "2": "Amplitude decay",
           "3": "Harmonic richness",
           "4": "Filter cutoff",
-          "5": "Turing loop probability (0 = always change, 1 = frozen)",
-          "6": "Glide / portamento time"
+          "5": "Turing loop probability (CCW=always change, CW=frozen loop)",
+          "6": "Glide / portamento time",
+          "7": "Octave shift (CCW=-2oct, noon=0, CW=+2oct)",
+          "8": "Sub-bass mix"
         },
-        "cv_in": { "1": "Filter frequency modulation (±1V)", "2": "unused" },
+        "switches": {
+          "1": "Step length (up/center=16-step, down=8-step)",
+          "2": "Filter type (up=LP, center=BP, down=HP)"
+        },
+        "cv_in": {
+          "1": "Filter frequency modulation (bipolar, exponential scaling)",
+          "2": "unused",
+          "3": "unused",
+          "4": "unused"
+        },
         "gate_in": { "1": "Clock", "2": "Bass accent" },
-        "gate_out": { "1": "Fires on accent step", "2": "Fires on non-accent step" },
-        "cv_out": { "1": "Alt note pitch (1V/oct)", "2": "Main note pitch with octave shift (1V/oct)" },
-        "leds": "Turing register lower byte as bitmap (1 LED per bit)",
-        "audio_in": "Mixed with synthesis output",
-        "audio_out": "Stereo synthesis + audio in mix"
+        "gate_out": { "1": "Fires on accent step (gate in 2 high)", "2": "Fires on non-accent step (gate in 2 low)" },
+        "cv_out": {
+          "1": "Alt note pitch from Turing hi-byte (1V/oct, 0V = MIDI 60)",
+          "2": "Main note pitch with octave shift (1V/oct, 0V = MIDI 60)"
+        },
+        "leds": "Turing register lower 8 bits as bitmap (1 LED per bit)",
+        "audio_in": "Summed with synthesis output (stereo passthrough)",
+        "audio_out": "Stereo filtered bass synthesis + audio in"
       }
     },
     {
       "id": "wizard_drumkit",
       "name": "Wizard Drumkit",
-      "description": "Euclidean drum sequencer with 3 voices (kick, snare, hihat) and chaos/swing",
-      "hardware": "earth",
-      "file": "ccam-earth-wizard_drumkit-v0.0.0.bin",
-      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-earth-wizard_drumkit-v0.0.0.bin",
+      "description": "Euclidean + Perlin noise drum sequencer with 3 switchable voices and logistic chaos/swing",
+      "hardware": "estuary",
+      "file": "ccam-estuary-wizard_drumkit-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-estuary-wizard_drumkit-v0.0.0.bin",
       "io": {
         "knobs": {
           "1": "BPM (20–300, overridden by external clock)",
@@ -66,14 +94,28 @@
           "3": "HiHat Perlin noise density threshold",
           "4": "Snare Perlin noise density threshold",
           "5": "Chaos / swing amount",
-          "6": "Kick pattern length (1–32 steps)"
+          "6": "Kick pattern length (1–32 steps)",
+          "7": "HiHat Perlin Y offset (shifts pattern in noise space)",
+          "8": "Snare Perlin Y offset (shifts pattern in noise space)"
         },
-        "cv_in": { "1": "HiHat stereo pan (±1V = left/right)", "2": "Snare frequency modulation (+100 Hz per 1V)" },
-        "gate_in": { "1": "External clock (overrides internal BPM)", "2": "Open hihat trigger (long decay)" },
+        "switches": {
+          "1": "Kick model (up=808, center=909, down=basic tone drum)",
+          "2": "Snare model (up=808, center=909, down=basic noise drum)"
+        },
+        "cv_in": {
+          "1": "HiHat stereo pan (±1V = full left/right)",
+          "2": "Snare frequency (+100 Hz per 1V)",
+          "3": "Kick pitch V/oct (wraps within 1 octave, base = C2 / 65 Hz)",
+          "4": "unused"
+        },
+        "gate_in": { "1": "External clock (overrides internal BPM when present)", "2": "Open hihat trigger (forces long decay on next hit)" },
         "gate_out": { "1": "Clock pulse (every step)", "2": "Kick trigger pulse" },
-        "cv_out": { "1": "HiHat noise value (0–5V)", "2": "Logistic chaos value (0–5V)" },
-        "leds": "16-step sequencer position (2 steps per LED, bright = active)",
-        "audio_in": "Mixed with drum synthesis output",
+        "cv_out": {
+          "1": "HiHat Perlin noise value (0–5V)",
+          "2": "Logistic chaos value (0–5V)"
+        },
+        "leds": "16-step sequencer position across 8 LEDs (2 steps per LED)",
+        "audio_in": "Summed with drum synthesis output (stereo passthrough)",
         "audio_out": "Stereo kick + snare + panned hihat mix"
       }
     }

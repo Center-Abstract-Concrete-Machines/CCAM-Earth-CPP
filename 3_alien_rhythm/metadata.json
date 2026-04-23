@@ -1,31 +1,39 @@
 {
-  "name": "Alien Rhythm",
-  "description": "3-voice Klee rhythm sequencer with resonant filter",
+  "name": "FRM: Alien Keys Rhythm",
+  "description": "3-voice Klee shift-register sequencer with resonant filter",
   "knobs": {
     "1": "Amplitude attack",
     "2": "Amplitude decay",
     "3": "Filter resonance",
     "4": "Filter cutoff",
-    "5": "Sync / hocket mode",
-    "6": "Note change probability"
+    "5": "Sync / hocket mode (CCW=sync with gate 2, noon=always fire, CW=hocket)",
+    "6": "Note change probability",
+    "7": "Jump range (scale degree leap size)",
+    "8": "Filter envelope attack"
+  },
+  "switches": {
+    "1": "Waveform (up=sine, center=triangle, down=saw)",
+    "2": "Filter mode (up=LP, center=BP, down=HP)"
   },
   "cv_in": {
-    "1": "Filter frequency modulation (±1V)",
-    "2": "unused"
+    "1": "Filter frequency modulation (bipolar ±1V)",
+    "2": "unused",
+    "3": "unused",
+    "4": "unused"
   },
   "gate_in": {
     "1": "Clock",
-    "2": "Accent / sync input"
+    "2": "Bass state / sync signal"
   },
   "gate_out": {
-    "1": "Fires when chord triggers",
-    "2": "Fires when chord rests"
+    "1": "Fires when step triggers (chord voice)",
+    "2": "Clock passthrough (mirrors gate in 1)"
   },
   "cv_out": {
-    "1": "Top voice pitch (1V/oct)",
-    "2": "Bottom voice pitch (1V/oct)"
+    "1": "Top voice pitch (1V/oct, 0V = MIDI 60 / middle C)",
+    "2": "Bottom voice pitch (1V/oct, 0V = MIDI 60 / middle C)"
   },
-  "leds": "16-step sequencer position (2 steps per LED, bright = active)",
-  "audio_in": "Mixed with synthesis output",
-  "audio_out": "Stereo synthesis + audio in mix"
+  "leds": "16-step sequencer position across 8 LEDs (2 steps per LED; bright=active, dim=inactive)",
+  "audio_in": "Summed with synthesis output (stereo passthrough)",
+  "audio_out": "Stereo filtered synthesis + audio in"
 }
