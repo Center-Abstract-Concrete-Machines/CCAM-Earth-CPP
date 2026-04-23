@@ -48,11 +48,11 @@ namespace hw {
  */
 struct Estuary {
 
-    void Init() 
+    void Init()
     {
         som.Init();
 
-        std::array<daisy::Pin, 8> ledPins = {
+        static constexpr std::array<daisy::Pin, 8> ledPins = {
             daisy::patch_sm::DaisyPatchSM::D2,
             daisy::patch_sm::DaisyPatchSM::D3,
             daisy::patch_sm::DaisyPatchSM::D4,
@@ -75,10 +75,13 @@ struct Estuary {
 
         for (uint8_t i = 0; i < knobs.size(); i++) {
             knobs[i] = &som.controls[adc_idx];
-            if (i >= 4) {
-                knobs[i]->Init(som.adc.GetPtr(adc_idx++), som.AudioCallbackRate());
-            } else {
+            if (i < 4) {
+                // Knobs 0-3: routed through PatchSM 5V CV inputs (inverting op-amp)
+                // InitBipolarCv compensates for the op-amp and gives 0.0-1.0 for 0-5V
                 knobs[i]->InitBipolarCv(som.adc.GetPtr(adc_idx++), som.AudioCallbackRate());
+            } else {
+                // Knobs 4-7: routed through 3.3V ADC inputs (direct)
+                knobs[i]->Init(som.adc.GetPtr(adc_idx++), som.AudioCallbackRate());
             }
         }
 
@@ -101,45 +104,61 @@ struct Estuary {
     {
         for (uint8_t i = 0; i < leds.size(); i++) {
             leds[i].Update();
-        };
+        }
     }
 
-    void ProcessAllControls() 
+    void ProcessAllControls()
     {
         som.ProcessAllControls();
         // Note: GateIn objects are processed automatically by the som.ProcessAllControls()
         // No additional processing needed for gate inputs
     }
 
-    void SetAudioSampleRate(size_t sample_rate) 
-    {
-        som.SetAudioSampleRate(sample_rate);
+    // --- Audio ---
+    float AudioSampleRate() { return som.AudioSampleRate(); }
+    float AudioCallbackRate() { return som.AudioCallbackRate(); }
+    void SetAudioSampleRate(size_t sr) { som.SetAudioSampleRate(sr); }
+    void SetAudioBlockSize(size_t bs) { som.SetAudioBlockSize(bs); }
+    void StartAudio(daisy::AudioHandle::AudioCallback cb) { som.StartAudio(cb); }
+
+    // --- Knobs (all return 0.0 to 1.0) ---
+    // Knobs 0-3: 5V CV inputs with inverting op-amp. InitBipolarCv gives
+    //   ~0.0 at CCW (0V) to ~0.65 at CW (3.3V). Scale to fill 0..1.
+    // Knobs 4-7: 3.3V ADC inputs, Init outputs 0..1 directly
+    float Knob(uint8_t i) {
+        if (i < 4) {
+            float v = knobs[i]->Value() * 1.55f;
+            if (v < 0.0f) v = 0.0f;
+            if (v > 1.0f) v = 1.0f;
+            return v;
+        }
+        return knobs[i]->Value();
     }
 
-    inline void SetAudioBlockSize(size_t block_size) 
-    {
-        som.SetAudioBlockSize(block_size);
-    }
+    // --- CV out ---
+    void WriteCvOut(int channel, float voltage) { som.WriteCvOut(channel, voltage); }
+    void StartCV(daisy::DacHandle::DacCallback cb) { som.StartDac(cb); }
 
-    inline void StartAudio(daisy::AudioHandle::AudioCallback cb)
-    {
-        som.StartAudio(cb);
-    }
-
-    inline void StartCV(daisy::DacHandle::DacCallback cb)
-    {
-        som.StartDac(cb);
-    }
-
-    inline size_t CvOutSampleRate() {
+    size_t CvOutSampleRate() const {
         return som.dac.GetConfig().target_samplerate;
     }
 
-    inline size_t CvOutCallbackRate() {
-        // correspond to size of dsy_patch_sm_dac_buffer
+    size_t CvOutCallbackRate() const {
         return som.dac.GetConfig().target_samplerate / 48;
     }
 
+    // --- Gate I/O ---
+    daisy::GateIn& GateIn1() { return som.gate_in_1; }
+    daisy::GateIn& GateIn2() { return som.gate_in_2; }
+    daisy::GPIO& GateOut1() { return som.gate_out_1; }
+    daisy::GPIO& GateOut2() { return som.gate_out_2; }
+
+    // --- Debug ---
+    void StartLog(bool wait = false) { som.StartLog(wait); }
+    template<typename... VA>
+    void PrintLine(const char* fmt, VA... va) { som.PrintLine(fmt, va...); }
+
+    // --- Hardware ---
     daisy::patch_sm::DaisyPatchSM som;                 // Core Daisy Patch SM hardware interface
     std::array<daisy::AnalogControl*, 8> knobs;         // 8 knobs (0-3: bipolar CV, 4-7: unipolar)
     std::array<daisy::AnalogControl*, 4> cvins;         // 4 CV inputs for external control
@@ -150,6 +169,6 @@ struct Estuary {
 
 } // namespace hw
 
-} // namspace ccam
+} // namespace ccam
 
 #endif // __CCAM_ESTUARY_H__
