@@ -51,7 +51,7 @@ jobs:
       - name: Generate firmware manifest
         run: |
           python3 - <<'EOF'
-          import json, os
+          import json, os, glob
           from datetime import date
 
           stable   = os.environ["STABLE_FIRMWARES"].split()
@@ -59,19 +59,26 @@ jobs:
           version  = os.environ["VERSION"]
           repo     = "Center-Abstract-Concrete-Machines/CCAM-Earth-CPP"
 
-          def to_title(s):
-              return " ".join(w.capitalize() for w in s.split("_"))
-
           firmwares = []
           for fw in stable:
+              # Load metadata.json from the project folder
+              matches = glob.glob(f"*_{fw}/metadata.json")
+              if not matches:
+                  raise FileNotFoundError(f"No metadata.json found for firmware: {fw}")
+              with open(matches[0]) as f:
+                  meta = json.load(f)
+
               filename = f"ccam-{hardware}-{fw}-{version}.bin"
-              firmwares.append({
-                  "id":       fw,
-                  "name":     to_title(fw),
-                  "hardware": hardware,
-                  "file":     filename,
-                  "url":      f"https://github.com/{repo}/releases/download/{version}/{filename}"
-              })
+              entry = {
+                  "id":          fw,
+                  "name":        meta.pop("name", fw),
+                  "description": meta.pop("description", ""),
+                  "hardware":    hardware,
+                  "file":        filename,
+                  "url":         f"https://github.com/{repo}/releases/download/{version}/{filename}",
+                  "io":          meta
+              }
+              firmwares.append(entry)
 
           manifest = {
               "version":   version.lstrip("v"),

@@ -1,6 +1,31 @@
 #ifndef __CCAM_EARTH_H__
 #define __CCAM_EARTH_H__
 
+/**
+ * CCAM Earth Hardware Abstraction
+ * 
+ * CCAM Earth is based on the Daisy Seed platform and provides access to:
+ * 
+ * Hardware Features:
+ * - 6 Knobs (analog inputs with CV capability)
+ * - 2 CV Inputs (additional analog inputs for external control)
+ * - 8 LEDs (programmable indicators)
+ * - 8 Buttons (momentary switches with pullup)
+ * - 2 Audio Inputs + 2 Audio Outputs (24-bit, up to 96kHz)
+ * - 2 CV Outputs (12-bit DAC for control voltage generation)
+ * 
+ * Target Use Case:
+ * - Compact modules requiring fewer physical controls
+ * - Cost-optimized designs
+ * - Projects focusing on audio processing over extensive manual control
+ * 
+ * Comparison to CCAM Estuary:
+ * - Fewer knobs (6 vs 8)
+ * - Fewer CV inputs (2 vs 4) 
+ * - More buttons (8 vs 2 switches)
+ * - Same audio I/O and CV output capabilities
+ */
+
 #include <array>
 
 #include "daisy_seed.h"
@@ -13,6 +38,15 @@ namespace ccam {
 
 namespace hw {
 
+/**
+ * CCAM Earth Hardware Abstraction Layer
+ * 
+ * Provides unified access to all Daisy Seed-based I/O:
+ * - Audio processing (Init, StartAudio)
+ * - Control voltage generation (StartCV)
+ * - Real-time control reading (ProcessAllControls)
+ * - LED and button management (PostProcess)
+ */
 struct Earth {
 
   /** Initializes the board according to the JSON board description
@@ -163,13 +197,13 @@ struct Earth {
         return som.dac.GetConfig().target_samplerate / cv_buf_len;
     }
 
-    daisy::DaisySeed som;
-    daisy::DacHandle::Config cvout;
-    std::array<daisy::AnalogControl, 8> controls;
-    std::array<daisy::AnalogControl*, 6> knobs;
-    std::array<daisy::AnalogControl*, 2> cvins;
-    std::array<daisy::Led, 8> leds;
-    std::array<daisy::Switch, 8> buttons;
+    daisy::DaisySeed som;                              // Core Daisy Seed hardware interface
+    daisy::DacHandle::Config cvout;                    // CV output configuration
+    std::array<daisy::AnalogControl, 8> controls;      // Raw analog control array (internal)
+    std::array<daisy::AnalogControl*, 6> knobs;        // 6 knobs for user interface
+    std::array<daisy::AnalogControl*, 2> cvins;        // 2 CV inputs for external control
+    std::array<daisy::Led, 8> leds;                    // 8 programmable LEDs 
+    std::array<daisy::Switch, 8> buttons;              // 8 momentary buttons
 };
 
 } // namespace hw
