@@ -1,0 +1,203 @@
+{
+  "name": "Nimbus Granular",
+  "author": "Ported from Mutable Instruments Clouds/Nimbus",
+  "description": "Granular synthesis processor with real-time buffer recording, grain manipulation, and integrated reverb. Based on the classic Mutable Instruments Clouds module but simplified for CCAM Estuary.",
+  "category": "Effect",
+  "tags": ["granular", "texture", "reverb", "delay", "clouds", "nimbus"],
+  "version": "1.0.0",
+  "controls": {
+    "knobs": [
+      {
+        "id": 0,
+        "name": "Position", 
+        "description": "Playback position in the recorded buffer. At 12 o'clock, plays from current position. Turn clockwise to read from older material, counterclockwise for newer.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "relative"
+      },
+      {
+        "id": 1,
+        "name": "Size",
+        "description": "Grain size/length. Controls how long each grain plays. Short grains create glitchy textures, long grains create smoother results.",
+        "min": 0.0,
+        "max": 1.0, 
+        "default": 0.3,
+        "units": "relative",
+        "range_description": "10ms to 210ms"
+      },
+      {
+        "id": 2,
+        "name": "Pitch",
+        "description": "Pitch shift for grains. At 12 o'clock is no shift. Turn up for higher pitch, down for lower pitch.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "semitones",
+        "range_description": "-12 to +12 semitones"
+      },
+      {
+        "id": 3,
+        "name": "Density",
+        "description": "Grain triggering rate/density. Low settings create sparse, rhythmic textures. High settings create dense clouds of sound.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.4,
+        "units": "relative",
+        "range_description": "0.5 to 8.5 grains/second"
+      },
+      {
+        "id": 4,
+        "name": "Texture",
+        "description": "Spectral character and filter cutoff. Shapes the harmonic content of the granular output.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.6,
+        "units": "relative",
+        "range_description": "200Hz to 8.2kHz cutoff"
+      },
+      {
+        "id": 5,
+        "name": "Dry/Wet",
+        "description": "Balance between original (dry) and processed (wet) signal. Fully counterclockwise is dry only, fully clockwise is wet only.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.7,
+        "units": "relative"
+      },
+      {
+        "id": 6,
+        "name": "Stereo Spread",
+        "description": "Stereo width of grains. Low values keep grains centered, high values spread them across the stereo field.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.3,
+        "units": "relative"
+      },
+      {
+        "id": 7,
+        "name": "Reverb",
+        "description": "Amount of integrated reverb applied to the granular output. Adds space and ambience.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.1,
+        "units": "relative"
+      }
+    ],
+    "switches": [
+      {
+        "id": 0,
+        "name": "Feedback",
+        "description": "Three-position switch controlling feedback amount. UP: high feedback (70%), CENTER: medium feedback (30%), DOWN: no feedback",
+        "positions": ["OFF", "MEDIUM", "HIGH"],
+        "default": 1
+      },
+      {
+        "id": 1, 
+        "name": "Freeze",
+        "description": "Two-position switch. UP: freeze buffer recording, DOWN: normal recording. When frozen, only existing buffer content is processed.",
+        "positions": ["RECORD", "FREEZE"],
+        "default": 0
+      }
+    ],
+    "cv_inputs": [
+      {
+        "id": 0,
+        "name": "Position CV",
+        "description": "CV modulation for playback position. ±1V range adds ±30% modulation to position parameter.",
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 1,
+        "name": "Pitch CV", 
+        "description": "CV modulation for pitch shift. ±1V range adds ±30% modulation to pitch parameter.",
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 2,
+        "name": "Density CV",
+        "description": "CV modulation for grain density. ±1V range adds ±30% modulation to density parameter.", 
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 3,
+        "name": "Texture CV",
+        "description": "CV modulation for texture/filter. ±1V range adds ±30% modulation to texture parameter.",
+        "range": "±5V", 
+        "response": "linear"
+      }
+    ],
+    "gate_inputs": [
+      {
+        "id": 0,
+        "name": "Freeze Gate",
+        "description": "Gate input to freeze buffer recording. High gate freezes the buffer, low gate allows normal recording.",
+        "type": "gate"
+      },
+      {
+        "id": 1,
+        "name": "Trigger Gate",
+        "description": "Gate input for manual grain triggering. Rising edge triggers a new grain.",
+        "type": "trigger"
+      }
+    ],
+    "gate_outputs": [
+      {
+        "id": 0,
+        "name": "Freeze Status",
+        "description": "Gate output indicating freeze state. High when buffer is frozen, low when recording normally.",
+        "type": "gate"
+      },
+      {
+        "id": 1,
+        "name": "Trigger Echo", 
+        "description": "Gate output echoing the trigger input for chaining or monitoring.",
+        "type": "gate"
+      }
+    ],
+    "cv_outputs": [
+      {
+        "id": 0,
+        "name": "Position Out",
+        "description": "CV output of current position parameter (including modulation). ±5V range.",
+        "range": "±5V"
+      },
+      {
+        "id": 1,
+        "name": "Pitch Out",
+        "description": "CV output of current pitch parameter (including modulation). ±5V range.",
+        "range": "±5V"
+      }
+    ]
+  },
+  "specifications": {
+    "audio_inputs": 2,
+    "audio_outputs": 2,
+    "sample_rate": "48kHz", 
+    "bit_depth": "24-bit",
+    "latency": "~1.3ms (64 samples)",
+    "buffer_size": "32k samples (~680ms at 48kHz)",
+    "max_grains": 16,
+    "polyphony": "16 grains simultaneous",
+    "memory_usage": "~256kB"
+  },
+  "usage_notes": [
+    "Input signal is continuously recorded to a circular buffer unless frozen",
+    "Grains are triggered automatically based on density setting, or manually via trigger input",
+    "Each grain can have independent pitch, position, and stereo placement",
+    "Feedback creates regenerative delay effects by feeding output back to input",
+    "Freeze mode stops recording but continues granular processing of existing buffer content",
+    "CV inputs provide additional modulation beyond the knob settings",
+    "LEDs show parameter values and freeze state for visual feedback"
+  ],
+  "tips": [
+    "Start with position at 12 o'clock, size around 9 o'clock, and density around 10 o'clock",
+    "Use freeze to capture interesting moments and process them without new input",
+    "Combine pitch and texture modulation for evolving soundscapes", 
+    "Higher density with smaller grain sizes creates more textural, less rhythmic results",
+    "The feedback switch dramatically changes the character - experiment with all positions"
+  ]
+}

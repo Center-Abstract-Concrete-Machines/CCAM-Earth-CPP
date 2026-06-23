@@ -118,6 +118,93 @@
         "audio_in": "Summed with drum synthesis output (stereo passthrough)",
         "audio_out": "Stereo kick + snare + panned hihat mix"
       }
+    },
+    {
+      "id": "hyperpop_pm",
+      "name": "Hyperpop PM",
+      "description": "Physical-modeling percussion voice that morphs from tight hats and glitch clicks to jungly snare textures",
+      "hardware": "estuary",
+      "file": "ccam-estuary-hyperpop_pm-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-estuary-hyperpop_pm-v0.0.0.bin",
+      "io": {
+        "knobs": {
+          "1": "Morph (tight closed hat -> glitch click -> jungly snare)",
+          "2": "Decay / ring time",
+          "3": "Glitch depth (sample hold + bit reduction)",
+          "4": "Body / weight",
+          "5": "Tone (dark -> bright metallic)",
+          "6": "Drive",
+          "7": "Stereo spread",
+          "8": "Output level"
+        },
+        "switches": {
+          "1": "Morph bias (up=hat bias, center=full macro range, down=snare bias)",
+          "2": "Gate behavior (up=G1 main + G2 accent, center=G2 choke, down=dual trigger layer)"
+        },
+        "cv_in": {
+          "1": "Morph modulation (bipolar)",
+          "2": "Decay modulation",
+          "3": "Tone modulation",
+          "4": "Glitch modulation"
+        },
+        "gate_in": {
+          "1": "Main trigger (patch from RS-9 closed hat/rim for core pulse train)",
+          "2": "Accent/open trigger (patch from RS-9 open hat/snare accent lane)"
+        },
+        "gate_out": {
+          "1": "Main trigger pulse out",
+          "2": "Accent pulse out"
+        },
+        "cv_out": {
+          "1": "Envelope follower 0-5V (use for ducking/sidechain patches)",
+          "2": "Current morph macro 0-5V"
+        },
+        "leds": "K1..K6 parameter intensity meters, LED7 trigger pulse, LED8 accent activity",
+        "audio_in": "Summed lightly into output for external layering",
+        "audio_out": "Stereo hyperpop physical-modeled percussion voice"
+      }
+    }
+    ,{
+      "id": "undertow_comp",
+      "name": "Undertow Comp",
+      "description": "Mid-side compressor with external sidechain, parallel compression, and tanh saturation",
+      "hardware": "estuary",
+      "file": "ccam-estuary-undertow_comp-v0.0.0.bin",
+      "url": "https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases/download/v0.0.0/ccam-estuary-undertow_comp-v0.0.0.bin",
+      "io": {
+        "knobs": {
+          "1": "Threshold (CCW=-40dB, CW=0dB)",
+          "2": "Ratio (1:1 to 20:1, log)",
+          "3": "Attack (0.1ms to 200ms, log)",
+          "4": "Release (10ms to 2000ms, log)",
+          "5": "Input trim (CCW=-20dB, noon=unity, CW=+20dB) — Eurorack level compensation",
+          "6": "Makeup gain (0 to +24dB)",
+          "7": "Drive / saturation (CCW=clean, CW=colored)",
+          "8": "Dry/wet — parallel compression blend"
+        },
+        "switches": {
+          "1": "Sidechain source (left=internal mid, center=internal mid + 100Hz HPF, right=external IN_R)",
+          "2": "M/S balance (left=equal mid+side, center=mid only, right=side emphasis ×1.5 ratio)"
+        },
+        "cv_in": {
+          "1": "Threshold modulation (bipolar ±16dB)",
+          "2": "Ratio modulation (bipolar ±10)",
+          "3": "Attack modulation (bipolar ±30%)",
+          "4": "Release modulation (bipolar ±30%)"
+        },
+        "gate_in": {
+          "1": "Hard bypass (high = pass audio unprocessed)",
+          "2": "Duck trigger (high = force sidechain key to 1.0, guaranteeing compression)"
+        },
+        "gate_out": { "1": "unused", "2": "unused" },
+        "cv_out": {
+          "1": "Gain reduction 0–5V (0V=no compression, 5V=24dB GR)",
+          "2": "RMS envelope follower 0–5V"
+        },
+        "leds": "Gain reduction bar meter — 8 LEDs at 3dB per step (0–24dB range)",
+        "audio_in": "Stereo audio (IN_L+IN_R processed as mid-side); IN_R = sidechain key when switch 1 is right",
+        "audio_out": "Stereo mid-side compressed output; mono to both channels when external sidechain active"
+      }
     }
   ]
 }

@@ -1,3 +1,4 @@
+#include "daisysp.h"
 #pragma once
 
 template<typename KnobControl, typename CvControl>

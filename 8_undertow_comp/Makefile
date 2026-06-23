@@ -1,0 +1,4 @@
+TARGET = undertow_comp
+CPP_SOURCES = $(wildcard $(CCAM_PROJECT)/*.cpp)
+APP_TYPE = BOOT_NONE
+USE_DAISYSP_LGPL = 1

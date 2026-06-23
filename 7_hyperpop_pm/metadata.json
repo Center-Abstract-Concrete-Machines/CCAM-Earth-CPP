@@ -1,0 +1,39 @@
+{
+  "name": "Hyperpop PM",
+  "description": "Physical-modeling percussion voice that morphs from tight hats and glitch clicks to jungly snare textures",
+  "knobs": {
+    "1": "Morph (tight closed hat -> glitch click -> jungly snare)",
+    "2": "Decay / ring time",
+    "3": "Glitch depth (sample hold + bit reduction)",
+    "4": "Body / weight",
+    "5": "Tone (dark -> bright metallic)",
+    "6": "Drive",
+    "7": "Stereo spread",
+    "8": "Output level"
+  },
+  "switches": {
+    "1": "Morph bias (up=hat bias, center=full macro range, down=snare bias)",
+    "2": "Gate behavior (up=G1 main + G2 accent, center=G2 choke, down=dual trigger layer)"
+  },
+  "cv_in": {
+    "1": "Morph modulation (bipolar)",
+    "2": "Decay modulation",
+    "3": "Tone modulation",
+    "4": "Glitch modulation"
+  },
+  "gate_in": {
+    "1": "Main trigger (patch from RS-9 closed hat/rim for core pulse train)",
+    "2": "Accent/open trigger (patch from RS-9 open hat/snare accent lane)"
+  },
+  "gate_out": {
+    "1": "Main trigger pulse out",
+    "2": "Accent pulse out"
+  },
+  "cv_out": {
+    "1": "Envelope follower 0-5V (use for ducking/sidechain patches)",
+    "2": "Current morph macro 0-5V"
+  },
+  "leds": "K1..K6 parameter intensity meters, LED7 trigger pulse, LED8 accent activity",
+  "audio_in": "Used as exciter source when present (mono detect from L/R); automatically falls back to internal noise exciter when silent, and is also lightly summed for layering",
+  "audio_out": "Stereo hyperpop physical-modeled percussion voice"
+}
