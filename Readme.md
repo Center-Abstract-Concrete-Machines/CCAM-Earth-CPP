@@ -14,7 +14,7 @@ This repository serves as a jumping off point for C++ projects built on the CCAM
   - 2 CV Outputs
   - 8 LEDs + 2 Three-way Switches
   - 2 Audio I/O
-  - **CCAM Earth** = 3.3v compact standalone desktop synth
+- **CCAM Earth** = 3.3v compact standalone desktop synth
   - 6 Knobs (analog inputs with CV capability)
   - 2 CV Inputs (external control)
   - 8 LEDs + 8 Buttons
@@ -62,8 +62,6 @@ You should see: `Found DFU: [0483:df11]` indicating the device is in DFU mode.
 
 ### Step 3: Flash Your Code
 
-1
-
 ```
 # Set target program
 export CCAM_PROJECT=0_kitchen_sink
@@ -72,9 +70,8 @@ export CCAM_PROJECT=0_kitchen_sink
 make program-dfu
 ```
 
-<<<<<<< Updated upstream
 The device will automatically start running your code after flashing completes.
-=======
+
 ## Releases & Branch Workflow
 
 Firmware releases are published to [GitHub Releases](https://github.com/Center-Abstract-Concrete-Machines/CCAM-Earth-CPP/releases). Each release includes a `firmware-manifest.json` that web-based flasher tools use to discover and download firmware.
@@ -112,13 +109,11 @@ Commit that change to `main`, then tag and push as above.
 ---
 
 ## Debug
-After you plug in the board, check `sudo dmesg | tail` to determine the serail port number. Then you can use screen to monitor the device.
+After you plug in the board, check `sudo dmesg | tail` to determine the serial port number. Then you can use screen to monitor the device.
 ```
 sudo screen /dev/ttyACM0 115200
 ```
-Note that the program will not start running until you connect, so if you do not plan on using the serial monitor it
-it probably a good idea to remove that line entirely.
->>>>>>> Stashed changes
+Note that the program will not start running until you connect, so if you do not plan on using the serial monitor, it is probably a good idea to remove that line entirely.
 
 ## Troubleshooting
 
