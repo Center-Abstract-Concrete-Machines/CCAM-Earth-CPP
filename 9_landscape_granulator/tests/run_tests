@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJ_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$PROJ_DIR/.." && pwd)"
+
+echo "===================================================================="
+echo "Building and running Landscape Granulator Host Tests (ASan/UBSan)..."
+echo "===================================================================="
+clang++ -std=c++17 -O2 -fsanitize=address,undefined -Wall -Wextra -Wno-unused-private-field \
+  -DUSE_DAISYSP_LGPL \
+  -I "$PROJ_DIR" \
+  -I "$SCRIPT_DIR" \
+  -I "$ROOT_DIR/DaisySP/Source" \
+  -I "$ROOT_DIR/DaisySP/DaisySP-LGPL/Source" \
+  "$SCRIPT_DIR/test_dsp.cpp" \
+  "$ROOT_DIR/DaisySP/DaisySP-LGPL/Source/Dynamics/compressor.cpp" \
+  -o "$SCRIPT_DIR/test_dsp_bin"
+
+"$SCRIPT_DIR/test_dsp_bin"
+rm -f "$SCRIPT_DIR/test_dsp_bin"
+
+echo ""
+echo "Landscape Granulator Offline Test Suite passed cleanly!"
