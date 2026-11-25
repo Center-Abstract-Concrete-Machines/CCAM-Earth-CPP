@@ -1,0 +1,184 @@
+{
+  "name": "Landscape Granulator",
+  "author": "AnimalGuide (ported from Estuary Landscape Granulator v2)",
+  "description": "32-voice AXI-SRAM stereo granulator with Tukey windowing, scale-quantized arpeggiator, 4-band LFO-modulated Chamberlin SVF bank, Schroeder/Cloud diffusion, orthonormal tape-warble reverb tank, freeze/overdub gates, and smart mono/stereo input summing.",
+  "category": "Effect",
+  "tags": ["granular", "reverb", "ambient", "texture", "freeze", "overdub"],
+  "version": "2.0.0",
+  "controls": {
+    "knobs": [
+      {
+        "id": 0,
+        "name": "Grain Size",
+        "description": "Grain duration from 80 ms to 750 ms per pass (1.5 s per 2-pass voice) using pow(x, 1.4) curve.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "relative",
+        "range_description": "80 ms to 750 ms"
+      },
+      {
+        "id": 1,
+        "name": "Grain Density",
+        "description": "Target grain overlap from 1 to 32 simultaneous voices with equal-power auto-gain.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "voices",
+        "range_description": "1 to 32 grains"
+      },
+      {
+        "id": 2,
+        "name": "Arp Reach",
+        "description": "Pitch arpeggiator spread across the active scale from -12 to +24 semitones; unison + micro-detune at 0%.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "units": "semitones",
+        "range_description": "-12 to +24 st"
+      },
+      {
+        "id": 3,
+        "name": "Randomness",
+        "description": "Expands playhead time-scatter (20-520 ms), micro-detune (+/-4 to +/-15 cents), octave leaps, and frozen loop window (0.25-2.0 s).",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.0,
+        "units": "relative"
+      },
+      {
+        "id": 4,
+        "name": "Filter / Diffusion",
+        "description": "Sweeps the level-compensated 4-band LFO Chamberlin SVF bank and scales Schroeder/Cloud allpass diffusion.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "relative"
+      },
+      {
+        "id": 5,
+        "name": "Reverb Feedback",
+        "description": "Stereo tape-warble reverb tank decay time (0.10 to 0.985, up to 20+ s ambient tails).",
+        "min": 0.1,
+        "max": 0.985,
+        "default": 0.5,
+        "units": "relative"
+      },
+      {
+        "id": 6,
+        "name": "Verb Mix",
+        "description": "Equal-power crossfade between the granular cloud and the diffused reverb tank.",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.35,
+        "units": "relative"
+      },
+      {
+        "id": 7,
+        "name": "Dry / Wet Mix",
+        "description": "Equal-power blend between direct input (mono or true stereo) and the wet granulator/reverb engine (+6 dB wet makeup).",
+        "min": 0.0,
+        "max": 1.0,
+        "default": 0.5,
+        "units": "relative"
+      }
+    ],
+    "switches": [
+      {
+        "id": 0,
+        "name": "Arp Scale",
+        "description": "Pitch quantization scale: UP=Fifths/Fourths/Octaves, CENTER=Pentatonic/Add9, DOWN=Dual-LFO Octave + Just Intonation.",
+        "positions": ["PENTATONIC_ADD9", "FIFTHS", "CUSTOM_JUST"],
+        "default": 0
+      },
+      {
+        "id": 1,
+        "name": "Grain Direction",
+        "description": "Grain playback direction chosen at spawn: UP=Forward, CENTER=50% Random Forward/Reverse, DOWN=Reverse.",
+        "positions": ["RANDOM", "FORWARD", "REVERSE"],
+        "default": 1
+      }
+    ],
+    "cv_inputs": [
+      {
+        "id": 0,
+        "name": "Size CV",
+        "description": "Bipolar CV modulation for Grain Size (+/-50%).",
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 1,
+        "name": "Density CV",
+        "description": "Bipolar CV modulation for Grain Density (+/-50%).",
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 2,
+        "name": "Arp CV",
+        "description": "Bipolar CV modulation for Arp Reach (+/-50%).",
+        "range": "±5V",
+        "response": "linear"
+      },
+      {
+        "id": 3,
+        "name": "Space Swell CV",
+        "description": "Bipolar CV simultaneously modulating Filter/Diffusion (+/-35%) and Reverb Feedback (+/-50%).",
+        "range": "±5V",
+        "response": "linear"
+      }
+    ],
+    "gate_inputs": [
+      {
+        "id": 0,
+        "name": "Freeze",
+        "description": "Freezes the 2.0 s buffer while HIGH and loops a slice sized by Randomness (takes priority over Overdub).",
+        "type": "gate"
+      },
+      {
+        "id": 1,
+        "name": "Overdub",
+        "description": "Engages 95% continuous loop overdub with asymptotic saturation while HIGH (and Freeze is LOW).",
+        "type": "gate"
+      }
+    ],
+    "gate_outputs": [
+      {
+        "id": 0,
+        "name": "Freeze Active",
+        "description": "High when Freeze gate is active.",
+        "type": "gate"
+      },
+      {
+        "id": 1,
+        "name": "Overdub Active",
+        "description": "High when Overdub gate is active.",
+        "type": "gate"
+      }
+    ],
+    "cv_outputs": [
+      {
+        "id": 0,
+        "name": "Unused",
+        "description": "Unused.",
+        "range": "0-5V"
+      },
+      {
+        "id": 1,
+        "name": "Pan LFO",
+        "description": "Internal stereo pan LFO output (0-5V).",
+        "range": "0-5V"
+      }
+    ]
+  },
+  "specifications": {
+    "audio_inputs": 2,
+    "audio_outputs": 2,
+    "sample_rate": "48kHz",
+    "bit_depth": "24-bit",
+    "block_size": 48,
+    "buffer_size": "96k samples (2.0s at 48kHz in AXI SRAM)",
+    "max_grains": 32
+  }
+}
